@@ -23,7 +23,7 @@ if __name__ == '__main__':
         print(f'Error: AZURE_STRING environment variable not set.')
         exit(1)
 
-    hub_name = "test1"
+    hub_name = "logger"
 
     service = WebPubSubServiceClient.from_connection_string(connection_string, hub=hub_name)
     token = service.get_client_access_token()
