@@ -1,18 +1,29 @@
 import asyncio
 import websockets
-import os
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
+import requests
 
 class Subscriber:
     def __init__(self, hub_name):
-        self.connection_string = os.getenv('AZURE_STRING')
-        if not self.connection_string:
-            raise ValueError("AZURE_STRING environment variable not set.")
+        self.connection_string = None
         self.hub_name = hub_name
         self.service_client = None
         self.token = None
 
+    def fetch_connection_string(self, api_url):
+        """Fetch the connection string from the Flask API."""
+        try:
+            response = requests.get(api_url)
+            response.raise_for_status()
+            self.connection_string = response.json().get('connection_string')
+            if not self.connection_string:
+                raise ValueError("Connection string not found in API response.")
+        except requests.RequestException as e:
+            raise RuntimeError(f"Failed to fetch connection string: {e}")
+        
     def connect(self):
+        if not self.connection_string:
+            raise ValueError("Connection string is not set. Fetch it first using `fetch_connection_string()`.")
         self.service_client = WebPubSubServiceClient.from_connection_string(self.connection_string, hub=self.hub_name)
         self.token = self.service_client.get_client_access_token()
         print(f"Connected to hub '{self.hub_name}'. Token generated.")
@@ -28,11 +39,13 @@ class Subscriber:
 
 
 if __name__ == '__main__':
+    flask_api_url = "http://127.0.0.1:5000/connection-string" 
     hub_name = "logger"
     subscriber = Subscriber(hub_name)
+    subscriber.fetch_connection_string(flask_api_url)
     subscriber.connect()
 
     try:
-        asyncio.get_event_loop().run_until_complete(subscriber.subscribe())
+        asyncio.run(subscriber.subscribe())
     except KeyboardInterrupt:
         print("\nDisconnected from WebSocket.")
