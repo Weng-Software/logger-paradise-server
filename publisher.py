@@ -1,6 +1,8 @@
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
 import os
 from flask import Flask, jsonify
+from log_generator import LogGenerator
+from log_reader import LogReader
 
 class Publisher:
     def __init__(self, hub_name):
@@ -20,6 +22,12 @@ class Publisher:
         self.service_client.send_to_all(message, content_type='text/plain')
         print(f"Message sent: {message}")
 
+    def publish_log(self, log):
+        if not self.service_client:
+            raise ValueError("Publisher is not connected. Call `connect()` first.")
+        self.service_client.send_to_all(str(log), content_type='text/plain')
+        print(f"Published Log: {log}")
+
 
 # Flask app to serve the connection string
 app = Flask(__name__)
@@ -37,5 +45,13 @@ if __name__ == '__main__':
     hub_name = "logger"
     publisher = Publisher(hub_name)
     publisher.connect()
-    publisher.publish("Hello from the Publisher!")
+
+    # Generate logs and simulate log reading
+    generator = LogGenerator(num_logs=100, timespan_minutes=10)
+    logs = generator.generate_logs()
+
+    reader = LogReader(logs, publisher, speedup_factor=60)
+    print("Starting log reader...")
+    reader.read_logs()
+
     app.run(debug=True)

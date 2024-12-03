@@ -1,6 +1,4 @@
 import datetime, time
-from log_generator import LogGenerator, LogData
-from publisher import Publisher
 
 class LogReader:
     def __init__(self, logs, publisher, speedup_factor=60):
