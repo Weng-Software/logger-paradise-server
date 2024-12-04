@@ -25,7 +25,7 @@ class Publisher:
     def publish_log(self, log):
         if not self.service_client:
             raise ValueError("Publisher is not connected. Call `connect()` first.")
-        self.service_client.send_to_all(str(log), content_type='text/plain')
+        self.service_client.send_to_all(str(log), content_type='text/plain') # application/JSON
         print(f"Published Log: {log}")
 
 
@@ -47,10 +47,10 @@ if __name__ == '__main__':
     publisher.connect()
 
     # Generate logs and simulate log reading
-    generator = LogGenerator(num_logs=100, timespan_minutes=10)
+    generator = LogGenerator(num_logs=5, timespan_minutes=1)
     logs = generator.generate_logs()
 
-    reader = LogReader(logs, publisher, speedup_factor=60)
+    reader = LogReader(logs, publisher, speedup_factor=5)
     print("Starting log reader...")
     reader.read_logs()
 

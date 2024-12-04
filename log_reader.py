@@ -1,7 +1,7 @@
 import datetime, time
 
 class LogReader:
-    def __init__(self, logs, publisher, speedup_factor=60):
+    def __init__(self, logs, publisher, speedup_factor=60): # comments on how speed up works
         self.logs = sorted(logs, key=lambda x: x.timestamp)
         self.publisher = publisher
         self.speedup_factor = speedup_factor
@@ -11,9 +11,13 @@ class LogReader:
             print("No logs to read.")
             return
 
-        start_time = datetime.datetime.fromisoformat(self.logs[0].timestamp[:-1])
+        total_duration = self.speedup_factor
+        # Time interval between logs
+        interval = total_duration / len(self.logs)
+
+        print(f"Sending {len(self.logs)} logs over {total_duration} seconds.")
         for log in self.logs:
-            current_time = datetime.datetime.fromisoformat(log.timestamp[:-1])
-            elapsed_real_time = (current_time - start_time).total_seconds() / self.speedup_factor
-            time.sleep(elapsed_real_time)
             self.publisher.publish_log(log)
+            time.sleep(interval)
+            # find out when the traceback happens
+            # JSON class is to be sent to the sub

@@ -18,7 +18,7 @@ class LogGenerator:
         self.start_time = datetime.datetime.utcnow()
 
     def generate_logs(self):
-        log_types = ["INFO", "WARNING", "ERROR"]
+        log_types = ["INFO", "WARNING", "ERROR"] # put into interiable
         logs = []
 
         for _ in range(self.num_logs):
@@ -51,7 +51,7 @@ class LogGenerator:
         messages = [
             "INFO in login: Login attempted by:USER",
             "WARNING in FILENAME: Clinic ID blank for session: USER",
-            "INFO in login: USER: PASSWORD login successful for: 110.175.74.138, 66.248.202.12:63928",
+            "INFO in login: USER: PASSWORD login successful for: 123.456.78.910, 88.888.888.88:88888",
         ]
         return random.choice(messages)
 
