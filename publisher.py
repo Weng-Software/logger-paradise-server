@@ -5,6 +5,7 @@ from log_generator import LogGenerator
 from log_reader import LogReader
 from dotenv import load_dotenv
 import os
+import threading, time
 
 class Publisher:
     def __init__(self, hub_name):
@@ -46,7 +47,7 @@ def get_connection_string():
 
 def start_flask():
     """Start the Flask server."""
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host="127.0.0.1", port=5000, debug=True, use_reloader=False)
 
 
 def start_log_reader(publisher):
@@ -55,6 +56,10 @@ def start_log_reader(publisher):
     NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
     TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
     SPEEDUP_FACTOR = int(os.getenv("SPEEDUP_FACTOR", 60))
+
+    # Wait for Flask server to be ready
+    print("Waiting for Flask server to start...")
+    time.sleep(2)  # Ensure the Flask server is ready
 
     generator = LogGenerator(num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES)
     logs = generator.generate_logs()
@@ -70,7 +75,6 @@ if __name__ == '__main__':
     publisher.connect()
 
     # Start Flask server in a separate thread
-    import threading
     flask_thread = threading.Thread(target=start_flask)
     flask_thread.daemon = True
     flask_thread.start()
