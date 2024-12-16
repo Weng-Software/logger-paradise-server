@@ -1,5 +1,8 @@
 import random
 import datetime
+import json
+from dotenv import load_dotenv
+import os
 
 class LogData:
     def __init__(self, timestamp, log_type, message):
@@ -7,18 +10,30 @@ class LogData:
         self.log_type = log_type
         self.message = message
 
+    def to_json(self):
+        """Convert the LogData object to a JSON string."""
+        return json.dumps({
+            "timestamp": self.timestamp,
+            "log_type": self.log_type,
+            "message": self.message
+        }, default=str)
+
     def __str__(self):
-        return f"{self.timestamp} {self.message}"
+        return self.to_json() # this is what is getting published and not a JSON, has to be in the format given
 
 
 class LogGenerator:
-    def __init__(self, num_logs=100, timespan_minutes=10):
+    # Load constants from .env
+    load_dotenv()
+    NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
+    TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
+    def __init__(self, num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES):
         self.num_logs = num_logs
         self.timespan_minutes = timespan_minutes
         self.start_time = datetime.datetime.utcnow()
 
     def generate_logs(self):
-        log_types = ["INFO", "WARNING", "ERROR"] # put into interiable
+        log_types = ["INFO", "WARNING", "ERROR"] # can put into interiable object
         logs = []
 
         for _ in range(self.num_logs):
@@ -39,7 +54,7 @@ class LogGenerator:
         elif log_type == "ERROR":
             return self._generate_error_message()
 
-    def _generate_info_message(self):
+    def _generate_info_message(self): # Fix log texts, add more text
         messages = [
             "\"POST /APICALL HTTP/1.1\" 200 9426 \"-\" \"ORIGIN\"",
             "INFO in FILE: RANDOMTEXTINFO",
@@ -60,3 +75,4 @@ class LogGenerator:
             "ERROR in patient_route: Traceback (most recent call last):\nFile \"FILENAME\", line 418, in FUNCTION\nERRONEOUS CODE\nFile \"FILENAME\", line 114, in FUNCTION\nERRONEOUS CODE\nAttributeError: 'REASON FOR ERROR'",
         ]
         return random.choice(messages)
+# change reader to do text search to filter INFO, WARNING, ERROR and only publish

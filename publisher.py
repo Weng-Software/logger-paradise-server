@@ -3,6 +3,8 @@ import os
 from flask import Flask, jsonify
 from log_generator import LogGenerator
 from log_reader import LogReader
+from dotenv import load_dotenv
+import os
 
 class Publisher:
     def __init__(self, hub_name):
@@ -25,7 +27,7 @@ class Publisher:
     def publish_log(self, log):
         if not self.service_client:
             raise ValueError("Publisher is not connected. Call `connect()` first.")
-        self.service_client.send_to_all(str(log), content_type='text/plain') # application/JSON
+        self.service_client.send_to_all(log.to_json(), content_type='application/json')
         print(f"Published Log: {log}")
 
 
@@ -35,10 +37,31 @@ app = Flask(__name__)
 # Flask route to provide the connection string
 @app.route('/connection-string', methods=['GET'])
 def get_connection_string():
+    """Return the connection string as JSON."""
     connection_string = os.getenv('AZURE_STRING')
     if not connection_string:
         return jsonify({'error': 'AZURE_STRING environment variable not set'}), 500
     return jsonify({'connection_string': connection_string})
+
+
+def start_flask():
+    """Start the Flask server."""
+    app.run(host="127.0.0.1", port=5000, debug=True)
+
+
+def start_log_reader(publisher):
+    """Generate logs and read them."""
+    load_dotenv()
+    NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
+    TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
+    SPEEDUP_FACTOR = int(os.getenv("SPEEDUP_FACTOR", 60))
+
+    generator = LogGenerator(num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES)
+    logs = generator.generate_logs()
+
+    reader = LogReader(logs, publisher, speedup_factor=SPEEDUP_FACTOR)
+    print("Starting log reader...")
+    reader.read_logs()
 
 # Example Usage
 if __name__ == '__main__':
@@ -46,12 +69,11 @@ if __name__ == '__main__':
     publisher = Publisher(hub_name)
     publisher.connect()
 
-    # Generate logs and simulate log reading
-    generator = LogGenerator(num_logs=5, timespan_minutes=1)
-    logs = generator.generate_logs()
+    # Start Flask server in a separate thread
+    import threading
+    flask_thread = threading.Thread(target=start_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
 
-    reader = LogReader(logs, publisher, speedup_factor=5)
-    print("Starting log reader...")
-    reader.read_logs()
-
-    app.run(debug=True)
+    # Start log reader in the main thread
+    start_log_reader(publisher)
