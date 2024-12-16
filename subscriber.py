@@ -2,6 +2,7 @@ import asyncio
 import websockets
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
 import requests
+import json
 
 class Subscriber:
     def __init__(self, hub_name):
@@ -35,7 +36,37 @@ class Subscriber:
             print("Connected to WebSocket")
             while True:
                 message = await ws.recv()
-                print(f"Received message: {message}")
+                self.process_message(message)
+
+    def process_message(self, message):
+        """Process received messages and trigger alerts for warnings or errors."""
+        try:
+            # Ensure the message is parsed as JSON
+            log_data = json.loads(message) if isinstance(message, str) else message
+            log_type = log_data.get("log_type")
+            timestamp = log_data.get("timestamp")
+            log_message = log_data.get("message")
+
+            # Check log type and display appropriate alert
+            if log_type == "INFO":
+                self.display_alert(timestamp, log_type, log_message, alert=False)
+            else:
+                self.display_alert(timestamp, log_type, log_message, alert=True)
+
+        except (json.JSONDecodeError, AttributeError):
+            print(f"Failed to process message: {message}")
+
+    def display_alert(self, timestamp, log_type, log_message, alert=False):
+        """Display messages with formatting for alerts."""
+        if log_type == "ERROR":
+            # Red for errors
+            print(f"\033[91m[ERROR ALERT] {timestamp} [{log_type}] {log_message}\033[0m")
+        elif log_type == "WARNING":
+            # Yellow for warnings
+            print(f"\033[93m[WARNING ALERT] {timestamp} [{log_type}] {log_message}\033[0m")
+        else:
+            # Default text for info
+            print(f"{timestamp} [{log_type}] {log_message}")
 
 
 if __name__ == '__main__':

@@ -27,7 +27,6 @@ class LogReader:
         print(f"Sending {len(self.logs)} logs over {total_duration} seconds.")
         for log in self.logs:
             self.publisher.publish_log(log)
-            time.sleep(interval) 
-            print(f"Processed Log: {log}") 
+            time.sleep(interval)
             # find out when the traceback happens
             # JSON class is to be sent to the sub

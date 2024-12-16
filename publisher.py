@@ -28,7 +28,7 @@ class Publisher:
     def publish_log(self, log):
         if not self.service_client:
             raise ValueError("Publisher is not connected. Call `connect()` first.")
-        self.service_client.send_to_all(log.to_json(), content_type='application/json')
+        self.service_client.send_to_all(log.__dict__, content_type='application/json')
         print(f"Published Log: {log}")
 
 
