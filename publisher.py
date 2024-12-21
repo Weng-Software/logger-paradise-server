@@ -13,7 +13,6 @@ config.read('config.ini')
 class Publisher:
     def __init__(self, hub_name):
         self.connection_string = config['AZURE'].get('AZURE_STRING')
-        print(self.connection_string)
         if not self.connection_string:
             raise ValueError("AZURE_STRING is not set in config.ini under [AZURE].")
         self.hub_name = hub_name
@@ -58,7 +57,7 @@ def start_log_reader(publisher):
     """Generate logs and read them."""
     NUM_LOGS = int(config['SETTINGS'].get('NUM_LOGS', 100))
     TIMESPAN_MINUTES = int(config['SETTINGS'].get('TIMESPAN_MINUTES', 10))
-    SPEEDUP_FACTOR = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
+    REAL_TIME = int(config['SETTINGS'].get('REAL_TIME', 60))
 
     # Wait for Flask server to be ready
     print("Waiting for Flask server to start...")
@@ -67,7 +66,7 @@ def start_log_reader(publisher):
     generator = LogGenerator(num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES)
     logs = generator.generate_logs()
 
-    reader = LogReader(logs, publisher, speedup_factor=SPEEDUP_FACTOR)
+    reader = LogReader(logs, publisher, real_time=REAL_TIME)
     print("Starting log reader...")
     reader.read_logs()
 

@@ -6,15 +6,15 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 class LogReader:
-    REAL_TIME = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
-    def __init__(self, logs, publisher, speedup_factor=REAL_TIME):
+    REAL_TIME = int(config['SETTINGS'].get('REAL_TIME', 60))
+    def __init__(self, logs, publisher, real_time=REAL_TIME):
         """
         The REAL_TIME here allows yout to determines how much faster logs are read/published in real-time.
         A REAL_TIME of 60 means it will take 60 seconds for the NUM_LOGS to be published.
         """
         self.logs = sorted(logs, key=lambda x: x.timestamp)
         self.publisher = publisher
-        self.speedup_factor = speedup_factor
+        self.real_time = real_time
 
     def read_logs(self):
         """Distribute logs evenly across the REAL_TIME duration."""
@@ -23,7 +23,7 @@ class LogReader:
             return
 
         # Total duration for logs to be sent
-        total_duration = self.speedup_factor
+        total_duration = self.real_time
         # Interval between log publications
         interval = total_duration / len(self.logs)
 
