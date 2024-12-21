@@ -1,7 +1,6 @@
 import random
 import datetime
 import json
-from dotenv import load_dotenv
 import os
 
 class LogData:
@@ -24,7 +23,6 @@ class LogData:
 
 class LogGenerator:
     # Load constants from .env
-    load_dotenv()
     NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
     TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
     def __init__(self, num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES):

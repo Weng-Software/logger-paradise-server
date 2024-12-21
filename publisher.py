@@ -1,11 +1,11 @@
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
-import os
 from flask import Flask, jsonify
 from log_generator import LogGenerator
 from log_reader import LogReader
 from dotenv import load_dotenv
+import threading
 import os
-import threading, time
+import time
 
 class Publisher:
     def __init__(self, hub_name):
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     # Start Flask server in a separate thread
     flask_thread = threading.Thread(target=start_flask)
-    flask_thread.daemon = True
+    flask_thread.daemon = False  # Keep Flask server running independently
     flask_thread.start()
 
     # Start log reader in the main thread
