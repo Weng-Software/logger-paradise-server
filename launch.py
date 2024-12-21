@@ -1,6 +1,4 @@
-import os
 import subprocess
-import platform
 
 def start_terminal(command, title=""):
     """Start a command in a new terminal window."""

@@ -2,8 +2,14 @@ import random
 import datetime
 import json
 import os
+import configparser
+
+# Load configuration from config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class LogData:
+
     def __init__(self, timestamp, log_type, message):
         self.timestamp = timestamp
         self.log_type = log_type
@@ -22,9 +28,8 @@ class LogData:
 
 
 class LogGenerator:
-    # Load constants from .env
-    NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
-    TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
+    NUM_LOGS = int(config['SETTINGS'].get('NUM_LOGS', 100))
+    TIMESPAN_MINUTES = int(config['SETTINGS'].get('TIMESPAN_MINUTES', 10))
     def __init__(self, num_logs=NUM_LOGS, timespan_minutes=TIMESPAN_MINUTES):
         self.num_logs = num_logs
         self.timespan_minutes = timespan_minutes

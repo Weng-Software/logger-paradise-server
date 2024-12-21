@@ -1,17 +1,21 @@
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
 from flask import Flask, jsonify
-from log_generator import LogGenerator
-from log_reader import LogReader
-from dotenv import load_dotenv
+from log_generator import LogGenerator  # Assuming this is defined elsewhere
+from log_reader import LogReader  # Assuming this is defined elsewhere
 import threading
-import os
 import time
+import configparser
+
+# Load configuration from config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
 
 class Publisher:
     def __init__(self, hub_name):
-        self.connection_string = os.getenv('AZURE_STRING')
+        self.connection_string = config['AZURE'].get('AZURE_STRING')
+        print(self.connection_string)
         if not self.connection_string:
-            raise ValueError("AZURE_STRING environment variable not set.")
+            raise ValueError("AZURE_STRING is not set in config.ini under [AZURE].")
         self.hub_name = hub_name
         self.service_client = None
 
@@ -39,9 +43,9 @@ app = Flask(__name__)
 @app.route('/connection-string', methods=['GET'])
 def get_connection_string():
     """Return the connection string as JSON."""
-    connection_string = os.getenv('AZURE_STRING')
+    connection_string = config['AZURE'].get('AZURE_STRING')
     if not connection_string:
-        return jsonify({'error': 'AZURE_STRING environment variable not set'}), 500
+        return jsonify({'error': 'AZURE_STRING is not set in config.ini under [AZURE]'}), 500
     return jsonify({'connection_string': connection_string})
 
 
@@ -52,10 +56,9 @@ def start_flask():
 
 def start_log_reader(publisher):
     """Generate logs and read them."""
-    load_dotenv()
-    NUM_LOGS = int(os.getenv("NUM_LOGS", 100))
-    TIMESPAN_MINUTES = int(os.getenv("TIMESPAN_MINUTES", 10))
-    SPEEDUP_FACTOR = int(os.getenv("SPEEDUP_FACTOR", 60))
+    NUM_LOGS = int(config['SETTINGS'].get('NUM_LOGS', 100))
+    TIMESPAN_MINUTES = int(config['SETTINGS'].get('TIMESPAN_MINUTES', 10))
+    SPEEDUP_FACTOR = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
 
     # Wait for Flask server to be ready
     print("Waiting for Flask server to start...")

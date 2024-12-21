@@ -1,9 +1,13 @@
 import datetime, time
-from dotenv import load_dotenv
 import os
-# Add constants in .env for num_logs, timespan_minutes and speedup_factor
+import configparser
+
+# Load configuration from config.ini
+config = configparser.ConfigParser()
+config.read('config.ini')
+
 class LogReader:
-    SPEEDUP_FACTOR = int(os.getenv("SPEEDUP_FACTOR", 60))
+    SPEEDUP_FACTOR = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
     def __init__(self, logs, publisher, speedup_factor=SPEEDUP_FACTOR):
         """
         The speedup factor determines how much faster logs are read compared to real-time.
