@@ -1,5 +1,4 @@
-import datetime, time
-import os
+import time
 import configparser
 
 # Load configuration from config.ini
@@ -7,18 +6,18 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 class LogReader:
-    SPEEDUP_FACTOR = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
-    def __init__(self, logs, publisher, speedup_factor=SPEEDUP_FACTOR):
+    REAL_TIME = int(config['SETTINGS'].get('SPEEDUP_FACTOR', 60))
+    def __init__(self, logs, publisher, speedup_factor=REAL_TIME):
         """
-        The speedup factor determines how much faster logs are read compared to real-time.
-        A speedup_factor of 60 means that logs spanning 1 minute of real time will be processed in 1 second.
+        The REAL_TIME here allows yout to determines how much faster logs are read/published in real-time.
+        A REAL_TIME of 60 means it will take 60 seconds for the NUM_LOGS to be published.
         """
         self.logs = sorted(logs, key=lambda x: x.timestamp)
         self.publisher = publisher
         self.speedup_factor = speedup_factor
 
     def read_logs(self):
-        """Distribute logs evenly across the speedup factor duration."""
+        """Distribute logs evenly across the REAL_TIME duration."""
         if not self.logs:
             print("No logs to read.")
             return
@@ -32,5 +31,3 @@ class LogReader:
         for log in self.logs:
             self.publisher.publish_log(log)
             time.sleep(interval)
-            # find out when the traceback happens
-            # JSON class is to be sent to the sub

@@ -1,7 +1,6 @@
 import random
 import datetime
 import json
-import os
 import configparser
 
 # Load configuration from config.ini
@@ -24,7 +23,7 @@ class LogData:
         }, default=str)
 
     def __str__(self):
-        return self.to_json() # this is what is getting published and not a JSON, has to be in the format given
+        return self.to_json()
 
 
 class LogGenerator:
@@ -36,7 +35,7 @@ class LogGenerator:
         self.start_time = datetime.datetime.utcnow()
 
     def generate_logs(self):
-        log_types = ["INFO", "WARNING", "ERROR"] # can put into interiable object
+        log_types = ["INFO", "WARNING", "ERROR"]
         logs = []
 
         for _ in range(self.num_logs):
@@ -57,7 +56,7 @@ class LogGenerator:
         elif log_type == "ERROR":
             return self._generate_error_message()
 
-    def _generate_info_message(self): # Fix log texts, add more text
+    def _generate_info_message(self): 
         messages = [
             "\"POST /APICALL HTTP/1.1\" 200 9426 \"-\" \"ORIGIN\"",
             "INFO in FILE: RANDOMTEXTINFO",
@@ -78,4 +77,3 @@ class LogGenerator:
             "ERROR in patient_route: Traceback (most recent call last):\nFile \"FILENAME\", line 418, in FUNCTION\nERRONEOUS CODE\nFile \"FILENAME\", line 114, in FUNCTION\nERRONEOUS CODE\nAttributeError: 'REASON FOR ERROR'",
         ]
         return random.choice(messages)
-# change reader to do text search to filter INFO, WARNING, ERROR and only publish

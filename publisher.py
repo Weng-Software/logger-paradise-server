@@ -1,7 +1,7 @@
 from azure.messaging.webpubsubservice import WebPubSubServiceClient
 from flask import Flask, jsonify
-from log_generator import LogGenerator  # Assuming this is defined elsewhere
-from log_reader import LogReader  # Assuming this is defined elsewhere
+from log_generator import LogGenerator 
+from log_reader import LogReader 
 import threading
 import time
 import configparser
@@ -71,7 +71,7 @@ def start_log_reader(publisher):
     print("Starting log reader...")
     reader.read_logs()
 
-# Example Usage
+
 if __name__ == '__main__':
     hub_name = "logger"
     publisher = Publisher(hub_name)
@@ -79,7 +79,7 @@ if __name__ == '__main__':
 
     # Start Flask server in a separate thread
     flask_thread = threading.Thread(target=start_flask)
-    flask_thread.daemon = False  # Keep Flask server running independently
+    flask_thread.daemon = False  # Keep Flask server running independently (Thank you Andrew Tan!)
     flask_thread.start()
 
     # Start log reader in the main thread
